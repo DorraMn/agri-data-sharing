@@ -1,0 +1,39 @@
+package com.example.demo.service;
+import com.example.demo.entity.Producteur;
+import com.example.demo.repository.ProducteurRepository;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class ProducteurService {
+	private final ProducteurRepository repository;
+
+    public ProducteurService(ProducteurRepository repository) {
+        this.repository = repository;
+    }
+
+    public Producteur save(Producteur producteur) {
+        return repository.save(producteur);
+    }
+
+    public List<Producteur> findAll() {
+        return repository.findAll();
+    }
+
+    public Producteur findById(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Producteur introuvable"));
+    }
+
+    public void delete(Long id) {
+        repository.deleteById(id);
+    }
+    
+    
+    public  String getRoleById(Long id) {
+        Producteur p = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Producteur introuvable"));
+        return p.getRole();
+    }
+}

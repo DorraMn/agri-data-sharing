@@ -1,0 +1,29 @@
+package com.example.demo.service;
+
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+@Service
+public class MessageProducer {
+
+    private final RabbitTemplate rabbitTemplate;
+
+    @Value("${rabbitmq.exchange}")
+    private String exchangeName;
+
+    @Value("${rabbitmq.routing-key}")
+    private String routingKey;
+
+    public MessageProducer(RabbitTemplate rabbitTemplate) {
+        this.rabbitTemplate = rabbitTemplate;
+    }
+
+    public void publish(Object payload) {
+
+        // Envoi JSON automatique (Jackson Message Converter)
+        rabbitTemplate.convertAndSend(exchangeName, routingKey, payload);
+
+        System.out.println("📤 Message envoyé vers RabbitMQ : " + payload);
+    }
+}

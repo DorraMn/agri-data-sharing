@@ -1,0 +1,28 @@
+{
+  "conversationId": "d18f9640-6152-4c0a-a560-248c31037fcf",
+  "title": "je veux push ce microservice sous  un dossier du m...",
+  "requesterUsername": "DorrahMoumen",
+  "responderUsername": "GitHub Copilot",
+  "turns": [
+    {
+      "message": {
+        "text": "je veux push ce microservice sous  un dossier du meme nom du microservice sous le repo suivant sous mon github : https://github.com/DorraMn/agri-data-sharing.git  "
+      },
+      "currentDocument": {
+        "uri": "/DonneesPartagees/src/main/java/com/example/demo/entity/Metadonnee.java"
+      },
+      "references": [],
+      "ignoredSkills": [],
+      "userLanguage": "en",
+      "source": "panel",
+      "model": "Claude Sonnet 4.5",
+      "chatMode": "Agent",
+      "needToolCallConfirmation": true,
+      "turnId": "a6d9c805-69e7-41ad-893e-7d9c64eae9cf",
+      "role": "user",
+      "timestamp": "2025-12-29T15:01:47.559230300Z"
+    }
+  ],
+  "creationDate": "2025-12-29T15:01:47.457403600Z",
+  "lastMessageDate": "2025-12-29T15:01:47.457403600Z"
+}

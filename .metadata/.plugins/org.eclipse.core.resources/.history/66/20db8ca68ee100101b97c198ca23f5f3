@@ -1,0 +1,28 @@
+package com.example.demo.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.extern.slf4j.Slf4j;
+
+import java.time.LocalDateTime;
+
+@Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Slf4j
+public class EvenementPublication {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private Long producteurId;
+
+    private String typeCulture;
+
+    private LocalDateTime dateReception;
+
+    @Column(columnDefinition = "TEXT")
+    private String payloadJson;
+}
