@@ -77,4 +77,10 @@ public class JeuDonneesService {
         });
         return jeux;
     }
+    
+    public JeuDonnees findById(Long id) {
+        log.info("Récupération du jeu de données ID: {}", id);
+        return repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Jeu de données non trouvé avec l'ID: " + id));
+    }
 }

@@ -1,4 +1,5 @@
 package com.example.demo.entity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -22,6 +23,16 @@ public class JeuDonnees {
     private String description;
     private String format;
     private LocalDate datePublication;
+    
+    // Champs pour le fichier
+    private String fileName;
+    private String fileType;
+    private Long fileSize;
+    
+    @Lob
+    @Column(columnDefinition = "LONGBLOB")
+    @JsonIgnore
+    private byte[] fileData;
 
     @OneToMany(mappedBy = "jeuDonnees", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
