@@ -229,7 +229,3 @@ Les fichiers de configuration des services sont gérés via **Spring Cloud Confi
 **Dorra Moumen**
 
 ---
-
-## 📄 Licence
-
-Ce projet est sous licence MIT.
