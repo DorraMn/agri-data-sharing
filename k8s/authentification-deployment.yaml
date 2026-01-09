@@ -1,0 +1,78 @@
+# ============================================
+# DEPLOYMENT - Authentification
+# ============================================
+# Service de gestion des utilisateurs et authentification JWT
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authentification
+  namespace: agri-system
+  labels:
+    app: authentification
+spec:
+  replicas: 2  # 2 instances pour haute disponibilité
+  selector:
+    matchLabels:
+      app: authentification
+  template:
+    metadata:
+      labels:
+        app: authentification
+    spec:
+      imagePullSecrets:
+      - name: gitlab-registry
+      containers:
+      - name: authentification
+        image: registry.gitlab.com/dorramn/miniprojetspring/authentification:v6
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8085
+          name: http
+        env:
+        - name: SPRING_CLOUD_CONFIG_ENABLED
+          value: "false"
+        - name: SPRING_PROFILES_ACTIVE
+          value: "kubernetes"
+        - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+          value: "http://eureka-server:8761/eureka/"
+        # Connexion MySQL
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:mysql://mysql:3306/auth_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true"
+        - name: SPRING_DATASOURCE_USERNAME
+          value: "root"
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: mysql-root-password
+        # Connexion RabbitMQ
+        - name: SPRING_RABBITMQ_HOST
+          value: "rabbitmq"
+        - name: SPRING_RABBITMQ_PORT
+          value: "5672"
+        - name: SPRING_RABBITMQ_USERNAME
+          value: "guest"
+        - name: SPRING_RABBITMQ_PASSWORD
+          value: "guest"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8085
+          initialDelaySeconds: 120
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8085
+          initialDelaySeconds: 90
+          periodSeconds: 5
+          timeoutSeconds: 3

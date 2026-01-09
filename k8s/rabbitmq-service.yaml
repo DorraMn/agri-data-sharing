@@ -1,0 +1,27 @@
+# ============================================
+# SERVICE - Point d'accès réseau à RabbitMQ
+# ============================================
+# Deux ports exposés :
+# - 5672 : AMQP (pour les microservices)
+# - 15672 : Management UI (pour administration)
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq
+  namespace: agri-system
+  labels:
+    app: rabbitmq
+spec:
+  type: ClusterIP  # Accès interne uniquement
+  ports:
+  - port: 5672
+    targetPort: 5672
+    protocol: TCP
+    name: amqp
+  - port: 15672
+    targetPort: 15672
+    protocol: TCP
+    name: management
+  selector:
+    app: rabbitmq

@@ -1,0 +1,58 @@
+# ============================================
+# DEPLOYMENT - Config Server
+# ============================================
+# Config Server = serveur de configuration centralisée
+# Tous les autres microservices vont chercher leur config ici
+# DOIT démarrer EN PREMIER avant les autres services
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: config-server
+  namespace: agri-system
+  labels:
+    app: config-server
+spec:
+  replicas: 1  # Une instance suffit
+  selector:
+    matchLabels:
+      app: config-server
+  template:
+    metadata:
+      labels:
+        app: config-server
+    spec:
+      imagePullSecrets:
+      - name: gitlab-registry
+      containers:
+      - name: config-server
+        image: registry.gitlab.com/dorramn/miniprojetspring/config-server:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9999
+          name: http
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "kubernetes"  # Profil Kubernetes
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        # Vérifier que le service répond
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 9999
+          initialDelaySeconds: 90
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 9999
+          initialDelaySeconds: 60
+          periodSeconds: 5
+          timeoutSeconds: 3

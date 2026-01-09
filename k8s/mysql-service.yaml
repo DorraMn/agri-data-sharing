@@ -1,0 +1,23 @@
+# ============================================
+# SERVICE - Point d'accès réseau à MySQL
+# ============================================
+# Service = DNS interne pour accéder à MySQL
+# Les autres services utiliseront : mysql.agri-system.svc.cluster.local:3306
+# Ou simplement : mysql:3306 (depuis le même namespace)
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: agri-system
+  labels:
+    app: mysql
+spec:
+  type: ClusterIP  # Accès interne uniquement (pas depuis l'extérieur)
+  ports:
+  - port: 3306
+    targetPort: 3306
+    protocol: TCP
+    name: mysql
+  selector:
+    app: mysql  # Se connecte au pod avec label app=mysql

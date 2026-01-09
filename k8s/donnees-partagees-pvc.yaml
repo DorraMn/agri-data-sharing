@@ -1,0 +1,17 @@
+# ============================================
+# PVC - Stockage pour les fichiers uploadés
+# ============================================
+# Volume partagé pour stocker les fichiers uploadés par les utilisateurs
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: uploads-pvc
+  namespace: agri-system
+spec:
+  accessModes:
+    - ReadWriteMany  # Plusieurs pods peuvent accéder (pour scale horizontal)
+  resources:
+    requests:
+      storage: 10Gi  # 10 Go pour les fichiers
+  storageClassName: hostpath

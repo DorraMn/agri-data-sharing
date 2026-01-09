@@ -1,0 +1,63 @@
+# ============================================
+# DEPLOYMENT - Gérer le pod RabbitMQ
+# ============================================
+# RabbitMQ = message broker pour communication asynchrone
+# Management UI accessible sur port 15672
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq
+  namespace: agri-system
+  labels:
+    app: rabbitmq
+spec:
+  replicas: 1  # Une instance suffit pour dev/test
+  selector:
+    matchLabels:
+      app: rabbitmq
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      containers:
+      - name: rabbitmq
+        image: rabbitmq:3-management-alpine
+        ports:
+        - containerPort: 5672   # Port AMQP (communication)
+          name: amqp
+        - containerPort: 15672  # Port Management UI
+          name: management
+        env:
+        - name: RABBITMQ_DEFAULT_USER
+          value: "guest"
+        - name: RABBITMQ_DEFAULT_PASS
+          value: "guest"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        # Vérifier que RabbitMQ est vivant
+        livenessProbe:
+          exec:
+            command:
+            - rabbitmq-diagnostics
+            - -q
+            - ping
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+        # Vérifier que RabbitMQ est prêt
+        readinessProbe:
+          exec:
+            command:
+            - rabbitmq-diagnostics
+            - -q
+            - check_running
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          timeoutSeconds: 3

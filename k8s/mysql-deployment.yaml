@@ -1,0 +1,89 @@
+# ============================================
+# DEPLOYMENT - Gérer le pod MySQL
+# ============================================
+# Deployment = gère l'exécution de MySQL
+# - 1 replica (base de données ne peut pas avoir plusieurs instances facilement)
+# - Volume monté pour la persistance
+# - Variables d'environnement depuis Secret et ConfigMap
+# - Health checks pour vérifier que MySQL est prêt
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: agri-system
+  labels:
+    app: mysql
+spec:
+  replicas: 1  # Une seule instance (DB ne se scale pas horizontalement facilement)
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:8.0
+        ports:
+        - containerPort: 3306
+          name: mysql
+        env:
+        # Variables d'environnement depuis le Secret
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: mysql-root-password
+        - name: MYSQL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: mysql-database
+        volumeMounts:
+        # Volume pour les données persistantes
+        - name: mysql-storage
+          mountPath: /var/lib/mysql
+        # ConfigMap avec le script d'initialisation
+        - name: mysql-initdb
+          mountPath: /docker-entrypoint-initdb.d
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        # Vérifier que MySQL répond
+        livenessProbe:
+          exec:
+            command:
+            - mysqladmin
+            - ping
+            - -h
+            - localhost
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        # Vérifier que MySQL est prêt à accepter des connexions
+        readinessProbe:
+          exec:
+            command:
+            - mysqladmin
+            - ping
+            - -h
+            - localhost
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 2
+      volumes:
+      # Volume persistant (PVC)
+      - name: mysql-storage
+        persistentVolumeClaim:
+          claimName: mysql-pvc
+      # ConfigMap avec init-db.sql
+      - name: mysql-initdb
+        configMap:
+          name: mysql-initdb-config

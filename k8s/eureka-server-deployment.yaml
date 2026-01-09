@@ -1,0 +1,60 @@
+# ============================================
+# DEPLOYMENT - Eureka Server
+# ============================================
+# Eureka = Service Discovery (registre de services)
+# Les microservices s'enregistrent ici et se trouvent entre eux
+# Dashboard accessible pour voir tous les services enregistrés
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eureka-server
+  namespace: agri-system
+  labels:
+    app: eureka-server
+spec:
+  replicas: 1  # Une instance pour simplicité
+  selector:
+    matchLabels:
+      app: eureka-server
+  template:
+    metadata:
+      labels:
+        app: eureka-server
+    spec:
+      imagePullSecrets:
+      - name: gitlab-registry
+      containers:
+      - name: eureka-server
+        image: registry.gitlab.com/dorramn/miniprojetspring/eureka-server:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8761
+          name: http
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "kubernetes"
+        # Attendre que Config Server soit prêt
+        - name: SPRING_CLOUD_CONFIG_URI
+          value: "http://config-server:9999"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8761
+          initialDelaySeconds: 90
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8761
+          initialDelaySeconds: 60
+          periodSeconds: 5
+          timeoutSeconds: 3

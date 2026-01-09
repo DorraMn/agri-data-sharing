@@ -1,0 +1,20 @@
+# ============================================
+# SERVICE - Authentification
+# ============================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: authentification
+  namespace: agri-system
+  labels:
+    app: authentification
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8081
+    targetPort: 8085
+    protocol: TCP
+    name: http
+  selector:
+    app: authentification

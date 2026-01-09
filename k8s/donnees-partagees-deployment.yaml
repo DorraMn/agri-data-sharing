@@ -1,0 +1,91 @@
+# ============================================
+# DEPLOYMENT - Données Partagées
+# ============================================
+# Service de gestion des données agricoles partagées
+# Gère l'upload et le partage de fichiers
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: donnees-partagees
+  namespace: agri-system
+  labels:
+    app: donnees-partagees
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: donnees-partagees
+  template:
+    metadata:
+      labels:
+        app: donnees-partagees
+    spec:
+      imagePullSecrets:
+      - name: gitlab-registry
+      containers:
+      - name: donnees-partagees
+        image: registry.gitlab.com/dorramn/miniprojetspring/donnees-partagees:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8082
+          name: http
+        env:
+        - name: CONFIG_SERVER_URL
+          value: "http://config-server:9999"
+        - name: SPRING_PROFILES_ACTIVE
+          value: "kubernetes"
+        - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+          value: "http://eureka-server:8761/eureka/"
+        # Connexion MySQL
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:mysql://mysql:3306/donnees_db?createDatabaseIfNotExist=true"
+        - name: SPRING_DATASOURCE_USERNAME
+          value: "root"
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: mysql-root-password
+        # Connexion RabbitMQ
+        - name: SPRING_RABBITMQ_HOST
+          value: "rabbitmq"
+        - name: SPRING_RABBITMQ_PORT
+          value: "5672"
+        - name: SPRING_RABBITMQ_USERNAME
+          value: "guest"
+        - name: SPRING_RABBITMQ_PASSWORD
+          value: "guest"
+        # Chemin pour les fichiers uploadés
+        - name: FILE_UPLOAD_DIR
+          value: "/app/uploads"
+        volumeMounts:
+        # Monter le volume pour les fichiers
+        - name: uploads-storage
+          mountPath: /app/uploads
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8082
+          initialDelaySeconds: 120
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8082
+          initialDelaySeconds: 90
+          periodSeconds: 5
+          timeoutSeconds: 3
+      volumes:
+      # Volume persistant pour les uploads
+      - name: uploads-storage
+        persistentVolumeClaim:
+          claimName: uploads-pvc

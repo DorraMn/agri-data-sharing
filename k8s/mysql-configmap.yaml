@@ -1,0 +1,21 @@
+# ============================================
+# CONFIGMAP - Stocker le script init-db.sql
+# ============================================
+# ConfigMap = stockage de fichiers de configuration
+# On y met init-db.sql pour initialiser la base
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-initdb-config
+  namespace: agri-system
+data:
+  init-db.sql: |
+    -- Script d'initialisation pour créer toutes les bases de données
+    
+    CREATE DATABASE IF NOT EXISTS auth_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+    CREATE DATABASE IF NOT EXISTS producteurs_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+    CREATE DATABASE IF NOT EXISTS donnees_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+    
+    -- Afficher les bases créées
+    SHOW DATABASES;

@@ -1,0 +1,20 @@
+# ============================================
+# SERVICE - Producteurs
+# ============================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: producteurs
+  namespace: agri-system
+  labels:
+    app: producteurs
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8082
+    targetPort: 8081
+    protocol: TCP
+    name: http
+  selector:
+    app: producteurs

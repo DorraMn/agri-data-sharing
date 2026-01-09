@@ -1,0 +1,14 @@
+# ============================================
+# NAMESPACE - Isoler tous les services
+# ============================================
+# Un namespace = un environnement isolé dans Kubernetes
+# Comme un dossier qui regroupe tous vos services
+# Bénéfices : organisation, sécurité, gestion des ressources
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: agri-system
+  labels:
+    name: agri-system
+    environment: production

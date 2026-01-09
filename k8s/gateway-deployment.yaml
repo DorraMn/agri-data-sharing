@@ -1,0 +1,84 @@
+# ============================================
+# DEPLOYMENT - Gateway
+# ============================================
+# Gateway = Point d'entrée unique pour toutes les API
+# Route les requêtes vers les bons microservices
+# Gère l'authentification JWT
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway
+  namespace: agri-system
+  labels:
+    app: gateway
+spec:
+  replicas: 2  # 2 instances pour load balancing
+  selector:
+    matchLabels:
+      app: gateway
+  template:
+    metadata:
+      labels:
+        app: gateway
+    spec:
+      imagePullSecrets:
+      - name: gitlab-registry
+      containers:
+      - name: gateway
+        image: registry.gitlab.com/dorramn/miniprojetspring/gateway:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: SPRING_CLOUD_CONFIG_ENABLED
+          value: "false"
+        - name: SPRING_PROFILES_ACTIVE
+          value: "kubernetes"
+        - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+          value: "http://eureka-server:8761/eureka/"
+        # Routes Gateway
+        - name: SPRING_CLOUD_GATEWAY_ROUTES_0_ID
+          value: "auth-service"
+        - name: SPRING_CLOUD_GATEWAY_ROUTES_0_URI
+          value: "lb://AUTHENTIFICATION"
+        - name: SPRING_CLOUD_GATEWAY_ROUTES_0_PREDICATES_0
+          value: "Path=/api/auth/**"
+        - name: SPRING_CLOUD_GATEWAY_ROUTES_1_ID
+          value: "producteurs-service"
+        - name: SPRING_CLOUD_GATEWAY_ROUTES_1_URI
+          value: "lb://PRODUCTEURS"
+        - name: SPRING_CLOUD_GATEWAY_ROUTES_1_PREDICATES_0
+          value: "Path=/api/producteurs/**"
+        - name: SPRING_CLOUD_GATEWAY_ROUTES_2_ID
+          value: "donnees-service"
+        - name: SPRING_CLOUD_GATEWAY_ROUTES_2_URI
+          value: "lb://DONNEESPARTAGEES"
+        - name: SPRING_CLOUD_GATEWAY_ROUTES_2_PREDICATES_0
+          value: "Path=/api/donnees/**"
+        - name: SPRING_CLOUD_GATEWAY_DISCOVERY_LOCATOR_ENABLED
+          value: "true"
+        - name: SPRING_CLOUD_GATEWAY_DISCOVERY_LOCATOR_LOWER-CASE-SERVICE-ID
+          value: "true"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 90
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 5
+          timeoutSeconds: 3

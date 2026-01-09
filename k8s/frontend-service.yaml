@@ -1,0 +1,20 @@
+# ============================================
+# SERVICE - Frontend
+# ============================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: agri-system
+  labels:
+    app: frontend
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  selector:
+    app: frontend

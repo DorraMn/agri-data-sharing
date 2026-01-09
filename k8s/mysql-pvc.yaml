@@ -1,0 +1,18 @@
+# ============================================
+# PVC - Stockage persistant pour MySQL
+# ============================================
+# PersistentVolumeClaim = demande de stockage persistant
+# Les données MySQL survivent même si le pod est supprimé
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pvc
+  namespace: agri-system
+spec:
+  accessModes:
+    - ReadWriteOnce  # Un seul pod peut écrire à la fois
+  resources:
+    requests:
+      storage: 5Gi  # 5 Go de stockage
+  storageClassName: hostpath  # Classe de stockage (hostpath pour Docker Desktop)
