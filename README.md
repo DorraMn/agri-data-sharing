@@ -226,7 +226,7 @@ Les fichiers de configuration des services sont gérés via **Spring Cloud Confi
 
 ## 👥 Auteur
 
-**Dorra Mnakri**
+**Dorra Moumen**
 
 ---
 
